@@ -25,6 +25,6 @@ def main():
     if args.c:
         packets = packets[:args.c]
     for p in packets:
-        get_etherneter_header(p)
+        get_ethernet_header(p)
 if __name__ == '__main__':
     main()
