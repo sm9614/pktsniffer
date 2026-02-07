@@ -77,17 +77,76 @@ def print_icmp_header(packet):
         print(f'Checksum: {icmp.chksum}\n')
 
 
+def filter_packets(packets, filter):
+    filter_type = filter[0].lower()
+    filtered_packets = []
+    for p in packets:
+        if filter_type == 'port':
+            port_number = int(filter[1])
+
+            if ((p.haslayer('TCP') and (p['TCP'].sport == port_number or p['TCP'].dport == port_number))
+                    or (p.haslayer('UDP') and (p['UDP'].sport == port_number or p['UDP'].dport == port_number))):
+                filtered_packets.append(p)
+
+        elif filter_type == 'ip':
+            if p.haslayer('IP'):
+                filtered_packets.append(p)
+
+        elif filter_type == 'tcp':
+            if p.haslayer('TCP'):
+                filtered_packets.append(p)
+
+        elif filter_type == 'udp':
+            if p.haslayer('UDP'):
+                filtered_packets.append(p)
+
+        elif filter_type == 'icmp':
+            if p.haslayer('ICMP'):
+                filtered_packets.append(p)
+
+        elif filter_type == 'net':
+            ip_address = filter[1]
+            if p.haslayer('IP') and (p['IP'].src.startswith(ip_address) or p['IP'].dst.startswith(ip_address)):
+                filtered_packets.append(p)
+
+    return filtered_packets
+
+
+def print_packets(packets, filter_type):
+    for i, p in enumerate(packets, start=1):
+        print(f'\n----------------Packet {i}----------------')
+        print_ethernet_header(p)
+        if filter_type == 'ip':
+            print_ip_header(p)
+        elif filter_type == 'tcp':
+            print_tcp_header(p)
+        elif filter_type == 'udp':
+            print_udp_header(p)
+        elif filter_type == 'icmp':
+            print_icmp_header(p)
+        elif filter_type == 'port':
+            print_tcp_header(p)
+            print_udp_header(p)
+        elif filter_type == 'net':
+            print_ip_header(p)
+        else:
+            print_ip_header(p)
+            print_tcp_header(p)
+            print_udp_header(p)
+            print_icmp_header(p)
+
+
 def main():
     args = get_args()
     packets = rdpcap(args.r)
     if args.c:
         packets = packets[:args.c]
-    for p in packets:
-        print_ethernet_header(p)
-        print_ip_header(p)
-        print_tcp_header(p)
-        print_udp_header(p)
-        print_icmp_header(p)
+        print_packets(packets, None)
+    elif args.filter:
+        filtered_packets = filter_packets(packets, args.filter)
+        print_packets(filtered_packets, args.filter[0])
+    else:
+        print_packets(packets, None)
 
 
 if __name__ == '__main__':
