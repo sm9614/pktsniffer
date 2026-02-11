@@ -2,6 +2,10 @@ from scapy.all import rdpcap
 from scapy.layers.l2 import Ether
 import argparse
 
+'''
+ Gets the arguments from the command line and returns them
+'''
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -13,6 +17,12 @@ def get_args():
     return parser.parse_args()
 
 
+'''
+packet: the packet being read
+Prints the Ethernet header of the given packet
+'''
+
+
 def print_ethernet_header(packet):
     if packet.haslayer(Ether):
         ether = packet[Ether]
@@ -21,6 +31,12 @@ def print_ethernet_header(packet):
         print(f'Destination MAC address:  {ether.dst}')
         print(f'Source MAC address:  {ether.src}')
         print(f'Ether Type: {ether.type}\n')
+
+
+'''
+packet: the packet being read
+Prints the IP header of the given packet
+'''
 
 
 def print_ip_header(packet):
@@ -41,6 +57,12 @@ def print_ip_header(packet):
         print(f'Destination Address: {ip.dst}\n')
 
 
+'''
+packet: the packet being read
+Prints the TCP header of the given packet
+'''
+
+
 def print_tcp_header(packet):
     if packet.haslayer('TCP'):
         tcp = packet['TCP']
@@ -58,6 +80,12 @@ def print_tcp_header(packet):
         print(f'Urgent Pointer: {tcp.urgptr}\n')
 
 
+'''
+packet: the packet being read
+Prints the UDP header of the given packet
+'''
+
+
 def print_udp_header(packet):
     if packet.haslayer('UDP'):
         udp = packet['UDP']
@@ -66,6 +94,12 @@ def print_udp_header(packet):
         print(f'Destination Port: {udp.dport}')
         print(f'Length: {udp.len} bytes')
         print(f'Checksum: {udp.chksum}\n')
+
+
+'''
+packet: the packet being read
+Prints the ICMP header of the given packet
+'''
 
 
 def print_icmp_header(packet):
@@ -77,6 +111,13 @@ def print_icmp_header(packet):
         print(f'Checksum: {icmp.chksum}\n')
 
 
+'''
+packets: the packets that are being read
+Filter: The filter that packets are being queried by
+Return: The packets after being filtered
+'''
+
+
 def filter_packets(packets, filter):
     filter_type = filter[0].lower()
     filtered_packets = []
@@ -84,6 +125,8 @@ def filter_packets(packets, filter):
         if filter_type == 'port':
             port_number = int(filter[1])
 
+            # Checks if the packet has TCP or UDP layer and if each of the
+            # source or destination ports match the port given in the filter
             if ((p.haslayer('TCP') and (p['TCP'].sport == port_number or p['TCP'].dport == port_number))
                     or (p.haslayer('UDP') and (p['UDP'].sport == port_number or p['UDP'].dport == port_number))):
                 filtered_packets.append(p)
@@ -106,10 +149,19 @@ def filter_packets(packets, filter):
 
         elif filter_type == 'net':
             ip_address = filter[1]
+
+            # Checks if the packet has an IP layer and if either the source or destination IP address starts with the given IP address
             if p.haslayer('IP') and (p['IP'].src.startswith(ip_address) or p['IP'].dst.startswith(ip_address)):
                 filtered_packets.append(p)
 
     return filtered_packets
+
+
+'''
+prints the packets based on the filter
+packets: the packets being read
+filter_type: the type of filter that is being used
+'''
 
 
 def print_packets(packets, filter_type):
@@ -136,14 +188,25 @@ def print_packets(packets, filter_type):
             print_icmp_header(p)
 
 
+'''
+main function
+'''
+
+
 def main():
     args = get_args()
+    # reads the pcap file passed in from the arguments
     packets = rdpcap(args.r)
     if args.c:
+        # Limits the number of packets based on the given count
         packets = packets[:args.c]
         print_packets(packets, None)
-    elif args.filter:
+    elif args.filter and args.c is None:
         filtered_packets = filter_packets(packets, args.filter)
+        print_packets(filtered_packets, args.filter[0])
+    elif args.filter and args.c:
+        filtered_packets = filter_packets(packets, args.filter)
+        filtered_packets = filtered_packets[:args.c]
         print_packets(filtered_packets, args.filter[0])
     else:
         print_packets(packets, None)
