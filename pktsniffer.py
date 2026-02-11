@@ -2,12 +2,11 @@ from scapy.all import rdpcap
 from scapy.layers.l2 import Ether
 import argparse
 
-'''
- Gets the arguments from the command line and returns them
-'''
-
 
 def get_args():
+    '''
+    Gets the arguments from the command line and returns them
+    '''
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', help='The pcap file being read')
     parser.add_argument(
@@ -17,13 +16,12 @@ def get_args():
     return parser.parse_args()
 
 
-'''
-packet: the packet being read
-Prints the Ethernet header of the given packet
-'''
-
-
 def print_ethernet_header(packet):
+    '''
+    Prints the Ethernet header of the given packet
+
+    :param packet: the packet being read
+    '''
     if packet.haslayer(Ether):
         ether = packet[Ether]
         print('Ethernet Header:')
@@ -33,13 +31,12 @@ def print_ethernet_header(packet):
         print(f'Ether Type: {ether.type}\n')
 
 
-'''
-packet: the packet being read
-Prints the IP header of the given packet
-'''
-
-
 def print_ip_header(packet):
+    '''
+    Prints the IP header of the given packet
+
+    :param packet: the packet being read
+    '''
     if packet.haslayer('IP'):
         ip = packet['IP']
         print('IP Header:')
@@ -57,13 +54,12 @@ def print_ip_header(packet):
         print(f'Destination Address: {ip.dst}\n')
 
 
-'''
-packet: the packet being read
-Prints the TCP header of the given packet
-'''
-
-
 def print_tcp_header(packet):
+    '''
+    Prints the TCP header of the given packet
+
+    :param packet: the packet being read
+    '''
     if packet.haslayer('TCP'):
         tcp = packet['TCP']
         print('TCP Header:')
@@ -80,13 +76,12 @@ def print_tcp_header(packet):
         print(f'Urgent Pointer: {tcp.urgptr}\n')
 
 
-'''
-packet: the packet being read
-Prints the UDP header of the given packet
-'''
-
-
 def print_udp_header(packet):
+    '''
+    Prints the UDP header of the given packet
+
+    :param packet: the packet being read
+    '''
     if packet.haslayer('UDP'):
         udp = packet['UDP']
         print('UDP Header:')
@@ -96,13 +91,12 @@ def print_udp_header(packet):
         print(f'Checksum: {udp.chksum}\n')
 
 
-'''
-packet: the packet being read
-Prints the ICMP header of the given packet
-'''
-
-
 def print_icmp_header(packet):
+    '''
+    Prints the ICMP header of the given packet
+
+    :param packet: the packet being read
+    '''
     if packet.haslayer('ICMP'):
         icmp = packet['ICMP']
         print('ICMP Header:')
@@ -111,14 +105,14 @@ def print_icmp_header(packet):
         print(f'Checksum: {icmp.chksum}\n')
 
 
-'''
-packets: the packets that are being read
-Filter: The filter that packets are being queried by
-Return: The packets after being filtered
-'''
-
-
 def filter_packets(packets, filter):
+    '''
+    Filters the packets based on the given filter
+
+    :param packets: the packets that are being read
+    :param filter: the filter that is being applied to the packets
+    :return: the filtered packets
+    '''
     filter_type = filter[0].lower()
     filtered_packets = []
     for p in packets:
@@ -150,21 +144,21 @@ def filter_packets(packets, filter):
         elif filter_type == 'net':
             ip_address = filter[1]
 
-            # Checks if the packet has an IP layer and if either the source or destination IP address starts with the given IP address
+            # Checks if the packet has an IP layer and if either the source 
+            # or destination IP address starts with the given IP address
             if p.haslayer('IP') and (p['IP'].src.startswith(ip_address) or p['IP'].dst.startswith(ip_address)):
                 filtered_packets.append(p)
 
     return filtered_packets
 
 
-'''
-prints the packets based on the filter
-packets: the packets being read
-filter_type: the type of filter that is being used
-'''
-
-
 def print_packets(packets, filter_type):
+    '''
+    prints the packets based on the filter
+
+    :param packets: the packets being read
+    :param filter_type: the type of filter that is being used
+    '''
     for i, p in enumerate(packets, start=1):
         print(f'\n----------------Packet {i}----------------')
         print_ethernet_header(p)
@@ -188,12 +182,10 @@ def print_packets(packets, filter_type):
             print_icmp_header(p)
 
 
-'''
-main function
-'''
-
-
 def main():
+    '''
+    main function
+    '''
     args = get_args()
     # reads the pcap file passed in from the arguments
     packets = rdpcap(args.r)
