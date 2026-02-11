@@ -1,6 +1,6 @@
 # pktsniffer
-
-A packet sniffer created using the Scapy library. It reads in a .pcap file 
+```
+Packet sniffer created using the Scapy library. It reads in a .pcap file 
 (generated from wireshark) and displays the packet headers based on the users commands
 
 Running the code:
@@ -12,16 +12,17 @@ Running the code:
 usage: pktsniffer.py [-h] [-r R] [-c C] [filter ...]
 
 positional arguments:
-  filter      filter types port, ip, tcp, udp, icmp, net
+    filter      filter types port, ip, tcp, udp, icmp, net
 
 options:
-  -h, --help  show this help message and exit
-  -r R        The pcap file being read
-  -c C        The number of packets being read
+    -h, --help  show this help message and exit
+    -r R        The pcap file being read
+    -c C        The number of packets being read
 
-  Example commands:
-  all packets      python pktsniffer.py -r packets.pcapng
-  First 3          python pktsniffer.py -r packets.pcapng -c 3
-  only TCP         python pktsniffer.py -r packets.pcapng tcp
-  IP Address       python pktsniffer.py -r packets.pcapng net 192.168
-  Port number      python pktsniffer.py -r packets.pcapng port 51365
+Example commands:
+    all packets      python pktsniffer.py -r packets.pcapng
+    First 3          python pktsniffer.py -r packets.pcapng -c 3
+    only TCP         python pktsniffer.py -r packets.pcapng tcp
+    IP Address       python pktsniffer.py -r packets.pcapng net 192.168
+    Port number      python pktsniffer.py -r packets.pcapng port 51365
+  ```
